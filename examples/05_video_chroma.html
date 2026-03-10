@@ -9,7 +9,7 @@
   <script src="https://cdn.8thwall.com/web/xrextras/xrextras.js"></script>
 
   <!-- 8th Wall Engine -->
-  <script async src="../engine/xr.js"></script>
+  <script async src="../engine/xr.js" data-preload-chunks="slam"></script>
 
   <!-- Image Target Configuration -->
   <script>
@@ -43,13 +43,17 @@
 
         this.video.pause();
 
-        this.el.addEventListener('xrimagefound', () => {
-          this.video.play();
-        });
+        // xrimagefound/xrimagelost fire on <a-scene>, not on the target element
+        this.onFound = () => { this.video.play(); };
+        this.onLost = () => { this.video.pause(); };
 
-        this.el.addEventListener('xrimagelost', () => {
-          this.video.pause();
-        });
+        this.el.sceneEl.addEventListener('xrimagefound', this.onFound);
+        this.el.sceneEl.addEventListener('xrimagelost', this.onLost);
+      },
+      remove: function () {
+        if (this.video) this.video.pause();
+        this.el.sceneEl.removeEventListener('xrimagefound', this.onFound);
+        this.el.sceneEl.removeEventListener('xrimagelost', this.onLost);
       },
     });
   </script>
